@@ -3,6 +3,9 @@ const router = express.Router();
 const auth = require('../controllers/auth.controller');
 const secure = require('../middlewares/secure.mid');
 
+router.get('/', (req, res, next) => {
+  res.redirect('/register')
+});
 router.get('/register', auth.register);
 router.post('/register', auth.doRegister);
 router.get('/login', auth.login);

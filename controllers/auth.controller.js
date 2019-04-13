@@ -17,7 +17,14 @@ module.exports.doRegister = (req, res, next) => {
 
   User.findOne({ email: req.body.email })
     .then(user => {
-      // TODO: save user & redirect to login
+      if(user) {
+        renderWithErrors({email:"already registered"})
+      }else{
+        user=new User (req.body) 
+        return user.save()
+        .then(user => res.redirect("/login"))
+      }
+
     })
     .catch(error => {
       if (error instanceof mongoose.Error.ValidationError) {
@@ -34,6 +41,24 @@ module.exports.login = (req, res, next) => {
 
 module.exports.doLogin = (req, res, next) => {
   // TODO: passport local-auth authentication & redirect to /profile
+  passport.authenticate('local-auth',(error,user,validation) => {
+    if(error) {
+      next(error)
+    } else if (!user) {
+      res.render('auth/login', {
+        user:req.body,
+        errors:validation
+      })
+    } else {
+      return req.login(user,(error)=> {
+        if(error) {
+          next(error)
+        } else {
+          res.redirect('/users')
+        }
+      })
+    }
+  })(req,res,next)
 }
 
 module.exports.loginWithGoogleCallback = (req, res, next) => {
